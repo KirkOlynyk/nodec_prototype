@@ -124,7 +124,7 @@ int on_status(http_parser* parser, const char* at, size_t len)
 	print_all("on_status", parser, at, len);
 	http_request_t* R = get_request(parser);
 	R->previous = ON_STATUS;
-	return 0;
+	return 1;
 }
 
 //---------------------------[ on_header_field ]-------------------------------
@@ -157,8 +157,19 @@ int on_header_value(http_parser* parser, const char* at, size_t len)
 {
 	print_all("on_header_value", parser, at, len);
 	http_request_t* R = get_request(parser);
+	int ans = 0;
+	switch (R->previous)
+	{
+	case ON_HEADER_FIELD:
+		break;
+	case ON_HEADER_VALUE:
+		break;
+	default:
+		ans = 1;
+		break;
+	}
 	R->previous = ON_HEADER_VALUE;
-	return 0;
+	return ans;
 }
 
 //---------------------------[ on_headers_complete ]---------------------------
@@ -167,10 +178,19 @@ int on_headers_complete(http_parser* parser)
 {
 	print_parser_only("on_headers_complete", parser);
 	http_request_t* R = get_request(parser);
+	int ans = 0;
+	switch (R->previous)
+	{
+	case ON_HEADER_VALUE:
+		break;
+	default:
+		ans = 1;
+		break;
+	}
 	R->previous = ON_HEADERS_COMPLETE;
 	R->headers_are_complete = true;
 	R->content_length = parser->content_length;
-	return 0;
+	return ans;
 }
 
 //---------------------------[ on_body ]---------------------------------------
@@ -179,8 +199,19 @@ int on_body(http_parser* parser, const char* at, size_t len)
 {
 	print_all("on_body", parser, at, len);
 	http_request_t* R = get_request(parser);
+	int ans = 0;
+	switch (R->previous)
+	{
+	case ON_HEADERS_COMPLETE:
+		break;
+	case ON_BODY:
+		break;
+	default:
+		ans = 1;
+		break;
+	}
 	R->previous = ON_BODY;
-	return 0;
+	return ans;
 }
 
 //---------------------------[ on_message_complete ]---------------------------
@@ -189,8 +220,19 @@ int on_message_complete(http_parser* parser)
 {
 	print_parser_only("on_message_complete", parser);
 	http_request_t* R = get_request(parser);
+	int ans = 0;
 	R->previous = ON_MESSAGE_COMPLETE;
-	return 0;
+	switch (R->previous)
+	{
+	case ON_HEADERS_COMPLETE:
+		break;
+	case ON_BODY:
+		break;
+	default:
+		ans = 1;
+		break;
+	}
+	return ans;
 }
 
 //---------------------------[ on_chunk_header ]-------------------------------
@@ -200,7 +242,7 @@ int on_chunk_header(http_parser* parser)
 	print_parser_only("on_chunk_header", parser);
 	http_request_t* R = get_request(parser);
 	R->previous = ON_CHUNK_HEADER;
-	return 0;
+	return 1;
 }
 
 //---------------------------[ on_chunk_complete ]-----------------------------
@@ -210,7 +252,7 @@ int on_chunk_complete(http_parser* parser)
 	print_parser_only("on_chunk_complete", parser);
 	http_request_t* R = get_request(parser);
 	R->previous = ON_CHUNK_COMPLETE;
-	return 0;
+	return 1;
 }
 
 //---------------------------[ http_request_execute ]--------------------------
