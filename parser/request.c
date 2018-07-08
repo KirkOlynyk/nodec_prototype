@@ -301,6 +301,8 @@ enum http_method http_request_method(const http_request_t* self)
 	return self->parser.method;
 }
 
+//---------------------------[ http_request_url--------------------------------
+
 string_t http_request_url(const http_request_t* self)
 {
 	string_t ans = { 0, 0 };
