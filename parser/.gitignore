@@ -1,2 +1,5 @@
+parser.VC.VC.opendb
+parser.VC.db
+x64/*
 /Debug/*
 /.vs/*

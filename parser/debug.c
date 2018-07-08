@@ -64,6 +64,7 @@ void debug_memcpy(void* dst, const void* src, size_t size)
 }
 
 //---------------------------[ pause ]-----------------------------------------
+// Print the message and then wait for the user to press ENTER
 //-----------------------------------------------------------------------------
 
 void pause(const char* msg)
@@ -71,4 +72,27 @@ void pause(const char* msg)
     printf("%s\n", msg);
     char buf[16];
     gets_s(buf, sizeof(buf));
+}
+
+//---------------------------[ print_parser_only ]-----------------------------
+//  Used for debugging the parser callbacks
+//-----------------------------------------------------------------------------
+
+void print_parser_only(const char* name, const http_parser *p) 
+{
+	printf("\n%s:\n", name);
+	printf("  http_parser: %p\n", p);
+}
+
+//---------------------------[ print_all ]-------------------------------------
+//  Used for debugging the parser callbacks
+//-----------------------------------------------------------------------------
+
+void print_all(const char* name, const http_parser *p, const char *buf, size_t len) 
+{
+	print_parser_only(name, p);
+	printf("  buf: %p\n", buf);
+	printf("  len: %zu\n", len);
+	if (buf != 0 && len > 0)
+		hexDump(buf, len, "Memory");
 }

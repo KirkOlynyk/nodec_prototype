@@ -1,5 +1,6 @@
 #pragma once
 #include <stdlib.h>
+#include "http_parser.h"
 
 //---------------------------[ debug_free ]------------------------------------
 // debug version of free
@@ -30,3 +31,15 @@ void hexDump(const void *addr, size_t len, const char* prefix);
 //-----------------------------------------------------------------------------
 
 void pause(const char* msg);
+
+//---------------------------[ print_parser_only ]-----------------------------
+// For priting the command line arguments to an http_parser callback
+//-----------------------------------------------------------------------------
+
+void print_parser_only(const char* name, const http_parser *p);
+
+//---------------------------[ print_all_only ]--------------------------------
+// For priting the command line arguments to an http_parser callback
+//-----------------------------------------------------------------------------
+
+void print_all(const char* name, const http_parser *p, const char *buf, size_t len);
