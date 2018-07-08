@@ -3,9 +3,10 @@
 #include "debug.h"
 #include "sbuf.h"
 #include "kvp.h"
+#include "request.h"
+#include "http_parser.h"
 
 //---------------------------[ test1 ]-----------------------------------------
-//-----------------------------------------------------------------------------
 
 void test1()
 {
@@ -15,7 +16,6 @@ void test1()
 }
 
 //---------------------------[ test2 ]-----------------------------------------
-//-----------------------------------------------------------------------------
 
 void test2()
 {
@@ -40,7 +40,6 @@ void test2()
 }
 
 //---------------------------[ test3 ]-----------------------------------------
-//-----------------------------------------------------------------------------
 
 void test3()
 {
@@ -82,4 +81,47 @@ void test3()
     printf("\n");
     kvpbuf_delete(&kvpbuf);
     sbuf_delete(&sbuf);
+}
+
+//---------------------------[ test4 ]-----------------------------------------
+
+void test4()
+{
+	const char* request_string =
+		"GET /docs/index.html HTTP/1.1\r\n"
+		"Host: www.nowhere123.com\r\n"
+		"Accept: image / gif, image / jpeg, */*\r\n"
+		"Accept-Language: en-us\r\n"
+		"Accept-Encoding: gzip, deflate\r\n"
+		"User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)\r\n"
+		"Content-Length: 5\r\n"
+		"\r\n"
+		"12345";
+
+	const char* methods[] =
+	{
+#define T(num, name, string) #string,
+		HTTP_METHOD_MAP(T)
+#undef T
+	};
+
+	http_request_t* req = http_request_alloc();
+	{
+		http_request_execute(req, request_string, strlen(request_string));
+		if (http_request_headers_are_complete(req)) {
+			printf("\n");
+			printf("http_major: %u\n", http_request_http_major(req));
+			printf("http_minor: %u\n", http_request_http_minor(req));
+			printf("content_length: %llu\n", http_request_content_length(req));
+			const enum http_method method = http_request_method(req);
+			printf("method: %d (%s)\n", method, methods[method]);
+			string_t url = http_request_url(req);
+			if (url.s && url.len > 0)
+			{
+				printf("url: \"%s\" (%u)\n", url.s, url.len);
+			}
+			printf("\n");
+		}
+	}
+	http_request_free(req);
 }
