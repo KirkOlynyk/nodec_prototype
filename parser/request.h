@@ -38,6 +38,7 @@ typedef struct _http_request_t {
 	uint64_t content_length;
     sbuf_t sbuf;
     size_t sbuf_inc;    // charcter chunk increment
+	kvp_t kvp;
     kvpbuf_t kvpbuf;
     size_t kvpbuf_inc;  // increment of the number of key-value pairs
     pascal_string_t url;

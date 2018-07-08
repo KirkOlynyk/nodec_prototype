@@ -138,10 +138,15 @@ int on_header_field(http_parser* parser, const char* at, size_t len)
 	{
 	case ON_URL:
 		R->url.length = sbuf_get_string_length(&R->sbuf);
+		R->kvp.key.start = sbuf_add(&R->sbuf, at, len, R->sbuf_inc);
 		break;
 	case ON_HEADER_FIELD:
+		sbuf_append(&R->sbuf, at, len, R->sbuf_inc);
 		break;
 	case ON_HEADER_VALUE:
+		R->kvp.value.length = sbuf_get_string_length(&R->sbuf);
+		kvpbuf_add(&R->kvpbuf, &R->kvp, R->kvpbuf_inc);
+		R->kvp.key.start = sbuf_add(&R->sbuf, at, len, R->sbuf_inc);
 		break;
 	default:
 		ans = 1;
@@ -161,8 +166,11 @@ int on_header_value(http_parser* parser, const char* at, size_t len)
 	switch (R->previous)
 	{
 	case ON_HEADER_FIELD:
+		R->kvp.key.length = sbuf_get_string_length(&R->sbuf);
+		R->kvp.value.start = sbuf_add(&R->sbuf, at, len, R->sbuf_inc);
 		break;
 	case ON_HEADER_VALUE:
+		sbuf_append(&R->sbuf, at, len, R->sbuf_inc);
 		break;
 	default:
 		ans = 1;
@@ -182,6 +190,8 @@ int on_headers_complete(http_parser* parser)
 	switch (R->previous)
 	{
 	case ON_HEADER_VALUE:
+		R->kvp.value.length = sbuf_get_string_length(&R->sbuf);
+		kvpbuf_add(&R->kvpbuf, &R->kvp, R->kvpbuf_inc);
 		break;
 	default:
 		ans = 1;

@@ -121,6 +121,19 @@ void test4()
 				printf("url: \"%s\" (%u)\n", url.s, url.len);
 			}
 			printf("\n");
+
+			for (size_t i = 0; i < req->kvpbuf.used; i++) {
+				const kvp_t* kvp = req->kvpbuf.buffer + i;
+				if (kvp->key.length > 0) {
+					const char* key = req->sbuf.buffer + kvp->key.start;
+					printf("\nkey:\"%s\"\n", key);
+				}
+				if (kvp->value.length > 0) {
+					const char* value = req->sbuf.buffer + kvp->value.start;
+					printf("value:\"%s\"\n", value);
+				}
+			}
+			printf("\n");
 		}
 	}
 	http_request_free(req);
