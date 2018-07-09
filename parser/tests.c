@@ -139,7 +139,8 @@ static void process_completed_request(http_request_t* req)
 #undef T
     };
 
-    printf("\n\n----------------------------------------------------------------------------------\n");
+    printf("\n\n--------------------------------"
+           "--------------------------------------------------\n");
     printf("http_major: %u\n", http_request_http_major(req));
     printf("http_minor: %u\n", http_request_http_minor(req));
     printf("content_length: %llu\n", http_request_content_length(req));
@@ -158,10 +159,15 @@ static void process_completed_request(http_request_t* req)
 
     const char* const field = "accept-language";
     string_t filter_string = { field, strlen(field) };
-    printf("\nFinding headers with fields matching \"accept-language\" ingnoring case ...\n\n");
-    http_request_filter_headers(req, header_filter, &filter_string, filter_headers_callback, 0);
+    printf("\nFinding headers with fields"
+        " matching \"accept-language\" ingnoring case ...\n\n");
+    http_request_filter_headers(
+        req,
+        header_filter, &filter_string,
+        filter_headers_callback, 0);
     printf("\n");
-    printf("----------------------------------------------------------------------------------\n\n");
+    printf("-------------------------------------------"
+           "---------------------------------------\n\n");
 }
 
 //---------------------------[ string_filter ]---------------------------------
