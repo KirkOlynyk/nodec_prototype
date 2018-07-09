@@ -4,6 +4,11 @@
 #include "sbuf.h"
 #include "kvp.h"
 
+//---------------------------[ string_t ]--------------------------------------
+// A safe string where we specify the location of the string and the length
+// not including any terminator
+//-----------------------------------------------------------------------------
+
 typedef struct _string_t {
 	const char* s;
 	size_t len;
