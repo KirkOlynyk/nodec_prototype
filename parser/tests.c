@@ -156,11 +156,36 @@ void test4()
 			//printf("\n");
             size_t count = 0;
             http_request_iter_headers(req, header_callback, &count);
+
+            extern bool string_filter(const string_t* a, void *data);
+            extern void filter_headers_callback(const header_t* header, void* data);
+
+            string_t filter_string = {
+                "accept-language",
+                strlen("accept-language")
+            };
+            printf("\nFinding \"accept-language\" headers ...\n");
+            http_request_filter_headers(req, string_filter, &filter_string, filter_headers_callback, 0);
+            printf("\n");
             printf("----------------------------------------------------------------------------------\n\n");
-		}
+        }
 	}
 	http_request_free(req);
 }
 
-// void http_iter_headers(const http_request_t* self, void(*callback)(const header_t*, void*), void* data)
+bool string_filter(const string_t* a, void *data)
+{
+    const string_t* b = (const string_t*)data;
+    bool ans = false;
+    if (a->len == b->len) {
+        if (_strnicmp(a->s, b->s, a->len) == 0)
+            ans = true;
+    }
+    return ans;
+}
+
+void filter_headers_callback(const header_t* header, void* data)
+{
+    printf("    \"%s\":\"%s\"\n", header->field.s, header->value.s);
+}
 

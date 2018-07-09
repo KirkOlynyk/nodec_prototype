@@ -200,6 +200,7 @@ int on_headers_complete(http_parser* parser)
 	R->previous = ON_HEADERS_COMPLETE;
 	R->headers_are_complete = true;
 	R->content_length = parser->content_length;
+    R->connection_close = !http_should_keep_alive(parser);
 	return ans;
 }
 
@@ -221,6 +222,7 @@ int on_body(http_parser* parser, const char* at, size_t len)
 		break;
 	}
 	R->previous = ON_BODY;
+    R->body_is_final = http_body_is_final(parser);
 	return ans;
 }
 
@@ -242,6 +244,7 @@ int on_message_complete(http_parser* parser)
 		ans = 1;
 		break;
 	}
+    R->connection_close = !http_should_keep_alive(parser);
 	return ans;
 }
 
@@ -342,4 +345,25 @@ void http_request_iter_headers(const http_request_t* self, void(*callback)(const
         header_t header = get_header(&self->sbuf, kvp);
         (*callback)(&header, data);
     }
+}
+
+typedef struct _filter_callback_data_t {
+    bool(*filter)(const string_t*, void*);
+    void* filter_data;
+    void(*callback)(const header_t* header, void*);
+    void* callback_data;
+} filter_callback_data_t;
+
+static void filter_callback(const header_t* header, void* _data)
+{
+    filter_callback_data_t* data = (filter_callback_data_t*)_data;
+    if ((*data->filter)(&header->field, data->filter_data)) {
+        (*data->callback)(header, data->callback);
+    }
+}
+
+void http_request_filter_headers(const http_request_t* self, bool(*filter)(const string_t*, void*), void* filter_data, void(*callback)(const header_t* header, void*), void* callback_data)
+{
+    filter_callback_data_t data = { filter, filter_data, callback, callback_data };
+    http_request_iter_headers(self, filter_callback, &data);
 }

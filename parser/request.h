@@ -57,6 +57,8 @@ typedef struct _http_request_t {
     size_t kvpbuf_inc;  // increment of the number of key-value pairs
     pascal_string_t url;
     http_parser_callback previous;
+    bool connection_close;
+    bool body_is_final;
 } http_request_t;
 
 #define HTTP_REQUEST_DEFAULT_SBUF_INC 32
@@ -116,6 +118,13 @@ enum http_method http_request_method(const http_request_t* self);
 
 string_t http_request_url(const http_request_t* self);
 
-//----------------------[ http_iter_headers ]----------------------------------
+//----------------------[ http_request_iter_headers ]--------------------------
 
 void http_request_iter_headers(const http_request_t* self, void(*callback)(const header_t*, void*), void* data);
+
+
+////---------------------[ http_request_find_headers ]---------------------------
+//// Iterates through all headers whose name's match the filter function
+////-----------------------------------------------------------------------------
+//
+void http_request_filter_headers(const http_request_t* self, bool(*filter)(const string_t*, void*), void* filter_data, void(*callback)(const header_t* header, void*), void* callback_data);
