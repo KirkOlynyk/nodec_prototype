@@ -143,8 +143,8 @@ void test4()
 				printf("url: \"%s\"\n", url.s);
 			printf("\n");
 
-            size_t count = 0;
-            http_request_iter_headers(req, header_callback, &count);
+            header_callback_data_t header_callback_data = { 0 };
+            http_request_iter_headers(req, header_callback, &header_callback_data);
 
             extern bool string_filter(const string_t* a, void *data);
             extern void filter_headers_callback(const header_t* header, void* data);
