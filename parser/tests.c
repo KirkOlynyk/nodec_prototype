@@ -120,8 +120,8 @@ void test4()
 
     const size_t len_request_string = strlen(request_string);
     size_t start_points[] = {0, 4, 8, 24, 32, 48, 50, 60, 65, 68, 70, len_request_string };
+    assert(_countof(start_points) > 2);
     assert(start_points[_countof(start_points)-2] < len_request_string);
-
 
 	http_request_t* req = http_request_alloc();
 	{
