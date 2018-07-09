@@ -5,6 +5,7 @@
 #include "kvp.h"
 #include "request.h"
 #include "http_parser.h"
+#include <assert.h>
 
 //---------------------------[ test1 ]-----------------------------------------
 
@@ -116,22 +117,21 @@ void test4()
 			const enum http_method method = http_request_method(req);
 			printf("method: %d (%s)\n", method, methods[method]);
 			string_t url = http_request_url(req);
-			if (url.s && url.len > 0)
+			if (url.s)
 			{
+				assert(url.len > 0);
 				printf("url: \"%s\" (%u)\n", url.s, url.len);
 			}
 			printf("\n");
 
 			for (size_t i = 0; i < req->kvpbuf.used; i++) {
 				const kvp_t* kvp = req->kvpbuf.buffer + i;
-				if (kvp->key.length > 0) {
-					const char* key = req->sbuf.buffer + kvp->key.start;
-					printf("\nkey:\"%s\"\n", key);
-				}
-				if (kvp->value.length > 0) {
-					const char* value = req->sbuf.buffer + kvp->value.start;
-					printf("value:\"%s\"\n", value);
-				}
+				assert(kvp->key.length > 0);
+				assert(kvp->value.length > 0);
+				const char* key = req->sbuf.buffer + kvp->key.start;
+				printf("\nkey:\"%s\"\n", key);
+				const char* value = req->sbuf.buffer + kvp->value.start;
+				printf("value:\"%s\"\n", value);
 			}
 			printf("\n");
 		}
