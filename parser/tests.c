@@ -95,6 +95,38 @@ static void header_callback(const header_t* header, void* data)
     callback_data->count += 1;
 }
 
+//---------------------------[ test4 ]-----------------------------------------
+void test4()
+{
+    static void process_completed_request(http_request_t* req);
+	const char* request_string =
+		"GET /docs/index.html HTTP/1.1\r\n"
+		"Host: www.nowhere123.com\r\n"
+		"Accept: image / gif, image / jpeg, */*\r\n"
+		"Accept-Language: en-us\r\n"
+		"Accept-Encoding: gzip, deflate\r\n"
+		"User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)\r\n"
+        "accept-Language: Eastern Canadian\r\n"
+		"Content-Length: 5\r\n"
+		"\r\n"
+		"12345";
+
+    const size_t len_request_string = strlen(request_string);
+    size_t start_points[] = {0, 4, 8, 24, 32, 48, 50, 60, 65, 68, 70, len_request_string };
+    assert(_countof(start_points) > 2);
+    assert(start_points[_countof(start_points)-2] < len_request_string);
+
+	http_request_t* req = http_request_alloc();
+    for (size_t i = 0; i < _countof(start_points) - 1; i++) {
+        size_t start = start_points[i];
+        size_t len = start_points[i + 1] - start;
+        http_request_execute(req, request_string + start, len);
+    }
+    if (http_request_headers_are_complete(req))
+        process_completed_request(req);
+	http_request_free(req);
+}
+
 //---------------------------[ process_completed_request ]---------------------
 // Called by test4
 //-----------------------------------------------------------------------------
@@ -130,37 +162,6 @@ static void process_completed_request(http_request_t* req)
     http_request_filter_headers(req, header_filter, &filter_string, filter_headers_callback, 0);
     printf("\n");
     printf("----------------------------------------------------------------------------------\n\n");
-}
-
-//---------------------------[ test4 ]-----------------------------------------
-void test4()
-{
-	const char* request_string =
-		"GET /docs/index.html HTTP/1.1\r\n"
-		"Host: www.nowhere123.com\r\n"
-		"Accept: image / gif, image / jpeg, */*\r\n"
-		"Accept-Language: en-us\r\n"
-		"Accept-Encoding: gzip, deflate\r\n"
-		"User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)\r\n"
-        "accept-Language: Eastern Canadian\r\n"
-		"Content-Length: 5\r\n"
-		"\r\n"
-		"12345";
-
-    const size_t len_request_string = strlen(request_string);
-    size_t start_points[] = {0, 4, 8, 24, 32, 48, 50, 60, 65, 68, 70, len_request_string };
-    assert(_countof(start_points) > 2);
-    assert(start_points[_countof(start_points)-2] < len_request_string);
-
-	http_request_t* req = http_request_alloc();
-    for (size_t i = 0; i < _countof(start_points) - 1; i++) {
-        size_t start = start_points[i];
-        size_t len = start_points[i + 1] - start;
-        http_request_execute(req, request_string + start, len);
-    }
-    if (http_request_headers_are_complete(req))
-        process_completed_request(req);
-	http_request_free(req);
 }
 
 //---------------------------[ string_filter ]---------------------------------
