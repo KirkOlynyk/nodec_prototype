@@ -82,11 +82,15 @@ void test3()
 }
 
 //---------------------------[ header_callback_data_t ]------------------------
+// used in test4
+//-----------------------------------------------------------------------------
 typedef struct _header_callback_data_t {
     size_t count;
 } header_callback_data_t;
 
 //---------------------------[ header_callback ]-------------------------------
+// used in test4
+//-----------------------------------------------------------------------------
 static void header_callback(const header_t* header, void* data)
 {
     header_callback_data_t* callback_data = (header_callback_data_t*)data;
@@ -96,39 +100,56 @@ static void header_callback(const header_t* header, void* data)
 }
 
 //---------------------------[ test4 ]-----------------------------------------
+// parse an HTTP request
+//-----------------------------------------------------------------------------
 void test4()
 {
-    static void process_completed_request(http_request_t* req);
-	const char* request_string =
-		"GET /docs/index.html HTTP/1.1\r\n"
-		"Host: www.nowhere123.com\r\n"
-		"Accept: image / gif, image / jpeg, */*\r\n"
-		"Accept-Language: en-us\r\n"
-		"Accept-Encoding: gzip, deflate\r\n"
-		"User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)\r\n"
-        "accept-Language: Eastern Canadian\r\n"
-		"Content-Length: 5\r\n"
-		"\r\n"
-		"12345";
-
-    const size_t len_request_string = strlen(request_string);
-    size_t start_points[] = {0, 4, 8, 24, 32, 48, 50, 60, 65, 68, 70, len_request_string };
-    assert(_countof(start_points) > 2);
-    assert(start_points[_countof(start_points)-2] < len_request_string);
-
+    static void test_request(http_request_t* req);
 	http_request_t* req = http_request_alloc();
+    test_request(req);
+	http_request_free(req);
+}
+
+
+//---------------------------[ test_request ]----------------------------------
+// used by test4
+//-----------------------------------------------------------------------------
+static void test_request(http_request_t* req)
+{
+    static void process_completed_request(http_request_t* req);
+    const char* request_string =
+        "GET /docs/index.html HTTP/1.1\r\n"
+        "Host: www.nowhere123.com\r\n"
+        "Accept: image / gif, image / jpeg, */*\r\n"
+        "Accept-Language: en-us\r\n"
+        "Accept-Encoding: gzip, deflate\r\n"
+        "User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)\r\n"
+        "accept-Language: Eastern Canadian\r\n"
+        "Content-Length: 5\r\n"
+        "\r\n"
+        "12345";
+
+    // break the request string into chunks
+    const size_t len_request_string = strlen(request_string);
+    size_t start_points[] = { 0, 4, 8, 24, 32, 48,
+        50, 60, 65, 68, 70, len_request_string };
+    assert(_countof(start_points) > 2);
+    assert(start_points[_countof(start_points) - 2] < len_request_string);
+
+    // execute the chunks
     for (size_t i = 0; i < _countof(start_points) - 1; i++) {
         size_t start = start_points[i];
         size_t len = start_points[i + 1] - start;
         http_request_execute(req, request_string + start, len);
     }
+
+    // print some results
     if (http_request_headers_are_complete(req))
         process_completed_request(req);
-	http_request_free(req);
 }
 
 //---------------------------[ process_completed_request ]---------------------
-// Called by test4
+// Called by test_request
 //-----------------------------------------------------------------------------
 static void process_completed_request(http_request_t* req)
 {
@@ -171,6 +192,8 @@ static void process_completed_request(http_request_t* req)
 }
 
 //---------------------------[ string_filter ]---------------------------------
+// used by process_completed_request
+//-----------------------------------------------------------------------------
 bool header_filter(const header_t* header, void *data)
 {
     const string_t* field = (const string_t*)data;
@@ -183,6 +206,8 @@ bool header_filter(const header_t* header, void *data)
 }
 
 //---------------------------[ filter_headers_callback ]-----------------------
+// used by process_completed_request
+//-----------------------------------------------------------------------------
 void filter_headers_callback(const header_t* header, void* data)
 {
     printf("    \"%s\":\"%s\"\n", header->field.s, header->value.s);
