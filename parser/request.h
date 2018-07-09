@@ -8,7 +8,6 @@
 // A safe string where we specify the location of the string and the length
 // not including any terminator
 //-----------------------------------------------------------------------------
-
 typedef struct _string_t {
 	const char* s;
 	size_t len;
@@ -17,7 +16,6 @@ typedef struct _string_t {
 //---------------------------[ string_t ]--------------------------------------
 //  For iterating through the headers
 //-----------------------------------------------------------------------------
-
 typedef struct _header_t {
     string_t field;
     string_t value;
@@ -26,7 +24,6 @@ typedef struct _header_t {
 //---------------------------[ http_parser_callback ]--------------------------
 // lists all possible http_parser callbacks
 //-----------------------------------------------------------------------------
-
 typedef enum _http_parser_callback {
     ON_NONE = 0,
     ON_MESSAGE_BEGIN,
@@ -44,7 +41,6 @@ typedef enum _http_parser_callback {
 //---------------------------[ http_request_t ]--------------------------------
 // Contains the state for completing an HTTP request
 //-----------------------------------------------------------------------------
-
 typedef struct _http_request_t {
     http_parser parser;
 	http_parser_settings settings;
@@ -67,64 +63,63 @@ typedef struct _http_request_t {
 //---------------------------[ http_request_alloc ]----------------------------
 // Allocates and initializes
 //-----------------------------------------------------------------------------
-
 http_request_t* http_request_alloc();
 
 //---------------------------[ http_request_free ]-----------------------------
 // deletes all resources and then frees up the memory
 //-----------------------------------------------------------------------------
-
 void http_request_free(http_request_t* self);
 
 
 //---------------------------[ http_request_execute ]--------------------------
 // Runs the request parser on a sequence of characters
 //-----------------------------------------------------------------------------
-
-size_t http_request_execute(http_request_t* self, const char* data, size_t lenght);
+size_t http_request_execute(
+    http_request_t* self,
+    const char* data,
+    size_t lenght);
 
 //--------------------[ http_request_headers_are_complete ]--------------------
 // If the headers are complete then you can ask about the content length,
 // http version, and method. Otherwise the values are invalid
 //-----------------------------------------------------------------------------
-
 bool http_request_headers_are_complete(const http_request_t* self);
 
 //--------------------[ http_request_content_length ]--------------------------
 // Answer is valid only if http_request_headers_are_complete is true
 //-----------------------------------------------------------------------------
-
 uint64_t http_request_content_length(const http_request_t* self);
 
 //--------------------[ http_request_http_major ]------------------------------
 // Answer is valid only if http_request_headers_are_complete is true
 //-----------------------------------------------------------------------------
-
 unsigned short http_request_http_major(const http_request_t* self);
 
 //--------------------[ http_request_http_minor ]------------------------------
 // Answer is valid only if http_request_headers_are_complete is true
 //-----------------------------------------------------------------------------
-
 unsigned short http_request_http_minor(const http_request_t* self);
 
 //--------------------[ http_request_method ]----------------------------------
 // Answer is valid only if http_request_headers_are_complete is true
 //-----------------------------------------------------------------------------
-
 enum http_method http_request_method(const http_request_t* self);
 
 //---------------------------[ http_request_url ]------------------------------
-
 string_t http_request_url(const http_request_t* self);
 
 //----------------------[ http_request_iter_headers ]--------------------------
+void http_request_iter_headers(
+    const http_request_t* self,
+    void(*callback)(const header_t*, void*),
+    void* data);
 
-void http_request_iter_headers(const http_request_t* self, void(*callback)(const header_t*, void*), void* data);
-
-
-////---------------------[ http_request_find_headers ]---------------------------
-//// Iterates through all headers whose name's match the filter function
-////-----------------------------------------------------------------------------
-//
-void http_request_filter_headers(const http_request_t* self, bool(*filter)(const string_t*, void*), void* filter_data, void(*callback)(const header_t* header, void*), void* callback_data);
+//---------------------[ http_request_find_headers ]---------------------------
+// Iterates through all headers whose name's match the filter function
+//-----------------------------------------------------------------------------
+void http_request_filter_headers(
+    const http_request_t* self,
+    bool(*filter)(const string_t*, void*),
+    void* filter_data,
+    void(*callback)(const header_t* header, void*),
+    void* callback_data);

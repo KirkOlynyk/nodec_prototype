@@ -5,7 +5,6 @@
 #include "sbuf.h"
 
 //-----------------[ forward declaration of callbacks ]------------------------
-
 int on_message_begin(http_parser*);
 int on_url(http_parser*, const char*, size_t);
 int on_status(http_parser*, const char*, size_t);
@@ -18,7 +17,6 @@ int on_chunk_header(http_parser*);
 int on_chunk_complete(http_parser*);
 
 //---------------------------[ init_settings ]---------------------------------
-
 static void init_settings(http_parser_settings* self)
 {
 	http_parser_settings_init(self);
@@ -39,7 +37,6 @@ static void init_settings(http_parser_settings* self)
 // initializes the fields of an http_requsest_t structure
 // private function used by http_request_alloc
 //-----------------------------------------------------------------------------
-
 static void http_request_init(http_request_t* self)
 {
     memset(self, 0, sizeof(*self));
@@ -55,7 +52,6 @@ static void http_request_init(http_request_t* self)
 //---------------------------[ http_request_alloc ]----------------------------
 // Allocates and initializes
 //-----------------------------------------------------------------------------
-
 http_request_t* http_request_alloc()
 {
     http_request_t* ans = (http_request_t*)debug_realloc(0, sizeof(*ans));
@@ -66,17 +62,16 @@ http_request_t* http_request_alloc()
 //---------------------------[ http_request_free ]-----------------------------
 // deletes all resources and then frees up the memory
 //-----------------------------------------------------------------------------
-
 void http_request_free(http_request_t* self)
 {
     sbuf_delete(&self->sbuf);
     kvpbuf_delete(&self->kvpbuf);
 	debug_free(self);
 }
+
 //---------------------------[ get_request ]-----------------------------------
 // returns a pointer to the http_request_t structure
 //-----------------------------------------------------------------------------
-
 static http_request_t* get_request(http_parser* parser)
 {
 	return (http_request_t*)(parser->data);
@@ -85,7 +80,6 @@ static http_request_t* get_request(http_parser* parser)
 //[ parser callbacks ]
 
 //---------------------------[ on_message_begin ]------------------------------
-
 int on_message_begin(http_parser* parser)
 {
 	print_parser_only("on_message_begin", parser);
@@ -95,7 +89,6 @@ int on_message_begin(http_parser* parser)
 }
 
 //---------------------------[ on_url ]----------------------------------------
-
 int on_url(http_parser* parser, const char* at, size_t len)
 {
 	print_all("on_url", parser, at, len);
@@ -118,7 +111,6 @@ int on_url(http_parser* parser, const char* at, size_t len)
 }
 
 //---------------------------[ on_status ]-------------------------------------
-
 int on_status(http_parser* parser, const char* at, size_t len)
 {
 	print_all("on_status", parser, at, len);
@@ -128,7 +120,6 @@ int on_status(http_parser* parser, const char* at, size_t len)
 }
 
 //---------------------------[ on_header_field ]-------------------------------
-
 int on_header_field(http_parser* parser, const char* at, size_t len)
 {
 	print_all("on_header_field", parser, at, len);
@@ -157,7 +148,6 @@ int on_header_field(http_parser* parser, const char* at, size_t len)
 }
 
 //---------------------------[ on_header_value ]-------------------------------
-
 int on_header_value(http_parser* parser, const char* at, size_t len)
 {
 	print_all("on_header_value", parser, at, len);
@@ -181,7 +171,6 @@ int on_header_value(http_parser* parser, const char* at, size_t len)
 }
 
 //---------------------------[ on_headers_complete ]---------------------------
-
 int on_headers_complete(http_parser* parser)
 {
 	print_parser_only("on_headers_complete", parser);
@@ -205,7 +194,6 @@ int on_headers_complete(http_parser* parser)
 }
 
 //---------------------------[ on_body ]---------------------------------------
-
 int on_body(http_parser* parser, const char* at, size_t len)
 {
 	print_all("on_body", parser, at, len);
@@ -227,7 +215,6 @@ int on_body(http_parser* parser, const char* at, size_t len)
 }
 
 //---------------------------[ on_message_complete ]---------------------------
-
 int on_message_complete(http_parser* parser)
 {
 	print_parser_only("on_message_complete", parser);
@@ -249,7 +236,6 @@ int on_message_complete(http_parser* parser)
 }
 
 //---------------------------[ on_chunk_header ]-------------------------------
-
 int on_chunk_header(http_parser* parser)
 {
 	print_parser_only("on_chunk_header", parser);
@@ -259,7 +245,6 @@ int on_chunk_header(http_parser* parser)
 }
 
 //---------------------------[ on_chunk_complete ]-----------------------------
-
 int on_chunk_complete(http_parser* parser)
 {
 	print_parser_only("on_chunk_complete", parser);
@@ -269,7 +254,6 @@ int on_chunk_complete(http_parser* parser)
 }
 
 //---------------------------[ http_request_execute ]--------------------------
-
 size_t http_request_execute(http_request_t* self, const char* data, size_t len) 
 {
 	print_all("http_request_execute", &self->parser, data, len);
@@ -278,7 +262,6 @@ size_t http_request_execute(http_request_t* self, const char* data, size_t len)
 }
 
 //--------------------[ http_request_headers_are_complete ]--------------------
-
 bool http_request_headers_are_complete(const http_request_t* self)
 {
 	return self->headers_are_complete;
@@ -287,35 +270,30 @@ bool http_request_headers_are_complete(const http_request_t* self)
 //--------------------[ http_request_content_length ]--------------------------
 // Answer is valid only if http_request_headers_are_complete is true
 //-----------------------------------------------------------------------------
-
 uint64_t http_request_content_length(const http_request_t* self)
 {
 	return self->content_length;
 }
 
 //--------------------[ http_request_http_major ]------------------------------
-
 unsigned short http_request_http_major(const http_request_t * self)
 {
 	return self->parser.http_major;
 }
 
 //--------------------[ http_request_http_minor ]------------------------------
-
 unsigned short http_request_http_minor(const http_request_t * self)
 {
 	return self->parser.http_minor;
 }
 
 //--------------------[ http_request_method ]----------------------------------
-
 enum http_method http_request_method(const http_request_t* self)
 {
 	return self->parser.method;
 }
 
 //---------------------------[ http_request_url--------------------------------
-
 string_t http_request_url(const http_request_t* self)
 {
     string_t ans = { 0, 0 };
@@ -327,7 +305,6 @@ string_t http_request_url(const http_request_t* self)
 }
 
 //---------------------------[ get_string_t ]----------------------------------
-
 static string_t get_string_t(const sbuf_t* sbuf, const pascal_string_t* pstring)
 {
     string_t ans = { sbuf_get_string(sbuf, pstring->start), pstring->length };
@@ -335,7 +312,6 @@ static string_t get_string_t(const sbuf_t* sbuf, const pascal_string_t* pstring)
 }
 
 //---------------------------[ get_header ]------------------------------------
-
 static header_t get_header(const sbuf_t* sbuf, const kvp_t* kvp)
 {
     header_t ans = { 
@@ -346,7 +322,6 @@ static header_t get_header(const sbuf_t* sbuf, const kvp_t* kvp)
 }
 
 //-------------------[ http_request_iter_headers ]-----------------------------
-
 void http_request_iter_headers(
     const http_request_t* self,
     void(*callback)(const header_t*, void*),
@@ -360,7 +335,6 @@ void http_request_iter_headers(
 }
 
 //---------------------------[ filter_callback_data_t ]------------------------
-
 typedef struct _filter_callback_data_t {
     bool(*filter)(const string_t*, void*);
     void* filter_data;
@@ -369,7 +343,6 @@ typedef struct _filter_callback_data_t {
 } filter_callback_data_t;
 
 //---------------------------[ filter_callback ]-------------------------------
-
 static void filter_callback(const header_t* header, void* _data)
 {
     filter_callback_data_t* data = (filter_callback_data_t*)_data;
@@ -379,7 +352,6 @@ static void filter_callback(const header_t* header, void* _data)
 }
 
 //---------------------[ http_request_filter_headers ]-------------------------
-
 void http_request_filter_headers(
     const http_request_t* self,
     bool(*filter)(const string_t*, void*),

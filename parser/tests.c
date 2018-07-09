@@ -8,7 +8,6 @@
 #include <assert.h>
 
 //---------------------------[ test1 ]-----------------------------------------
-
 void test1()
 {
     void* p = debug_realloc(0, 10);
@@ -17,7 +16,6 @@ void test1()
 }
 
 //---------------------------[ test2 ]-----------------------------------------
-
 void test2()
 {
     sbuf_t sbuf = { 0, 0, 0, 0 };
@@ -41,7 +39,6 @@ void test2()
 }
 
 //---------------------------[ test3 ]-----------------------------------------
-
 void test3()
 {
     struct {
@@ -84,19 +81,21 @@ void test3()
     sbuf_delete(&sbuf);
 }
 
-//---------------------------[ test4 ]-----------------------------------------
-
+//---------------------------[ header_callback_data_t ]------------------------
 typedef struct _header_callback_data_t {
     size_t count;
 } header_callback_data_t;
 
+//---------------------------[ header_callback ]-------------------------------
 static void header_callback(const header_t* header, void* data)
 {
     header_callback_data_t* callback_data = (header_callback_data_t*)data;
-    printf("%u: { \"%s\", \"%s\" }\n", callback_data->count, header->field.s, header->value.s);
+    printf("%u: { \"%s\", \"%s\" }\n",
+        callback_data->count, header->field.s, header->value.s);
     callback_data->count += 1;
 }
 
+//---------------------------[ test4 ]-----------------------------------------
 void test4()
 {
 	const char* method_names[] =
@@ -160,11 +159,9 @@ void test4()
             extern bool string_filter(const string_t* a, void *data);
             extern void filter_headers_callback(const header_t* header, void* data);
 
-            string_t filter_string = {
-                "accept-language",
-                strlen("accept-language")
-            };
-            printf("\nFinding \"accept-language\" headers ...\n");
+            const char* const field = "accept-language";
+            string_t filter_string = { field, strlen(field) };
+            printf("\nFinding headers with fields matching \"accept-language\" ingnoring case ...\n\n");
             http_request_filter_headers(req, string_filter, &filter_string, filter_headers_callback, 0);
             printf("\n");
             printf("----------------------------------------------------------------------------------\n\n");
@@ -173,6 +170,7 @@ void test4()
 	http_request_free(req);
 }
 
+//---------------------------[ string_filter ]---------------------------------
 bool string_filter(const string_t* a, void *data)
 {
     const string_t* b = (const string_t*)data;
@@ -184,8 +182,8 @@ bool string_filter(const string_t* a, void *data)
     return ans;
 }
 
+//---------------------------[ filter_headers_callback ]-----------------------
 void filter_headers_callback(const header_t* header, void* data)
 {
     printf("    \"%s\":\"%s\"\n", header->field.s, header->value.s);
 }
-
