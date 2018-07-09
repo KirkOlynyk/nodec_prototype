@@ -107,12 +107,18 @@ void test4()
 		"\r\n"
 		"12345";
 
+    const size_t len_request_string = strlen(request_string);
+    size_t start_points[] = {0, 4, 8, 24, 32, 48, 50, 60, 70, len_request_string };
+    assert(start_points[_countof(start_points)-2] < len_request_string);
+
+
 	http_request_t* req = http_request_alloc();
 	{
-		// TBD execute all the chunks
-		http_request_execute(req, request_string, strlen(request_string));
-
-
+        for (size_t i = 0; i < _countof(start_points) - 1; i++) {
+            size_t start = start_points[i];
+            size_t len = start_points[i + 1] - start;
+            http_request_execute(req, request_string + start, len);
+        }
 
 		if (http_request_headers_are_complete(req)) {
 			printf("\n");
@@ -121,12 +127,9 @@ void test4()
 			printf("content_length: %llu\n", http_request_content_length(req));
 			const enum http_method method = http_request_method(req);
 			printf("method: %d (%s)\n", method, methods[method]);
-			string_t url = http_request_url(req);
-			if (url.s)
-			{
-				assert(url.len > 0);
-				printf("url: \"%s\" (%u)\n", url.s, url.len);
-			}
+			const char* const url = http_request_url(req);
+			if (url)
+				printf("url: \"%s\"\n", url);
 			printf("\n");
 
 			for (size_t i = 0; i < req->kvpbuf.used; i++) {

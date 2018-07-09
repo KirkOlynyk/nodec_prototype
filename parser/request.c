@@ -107,7 +107,7 @@ int on_url(http_parser* parser, const char* at, size_t len)
 		R->url.start = sbuf_add(&R->sbuf, at, len, R->sbuf_inc);
 		break;
 	case ON_URL:
-		sbuf_add(&R->sbuf, at, len, R->sbuf_inc);
+		sbuf_append(&R->sbuf, at, len, R->sbuf_inc);
 		break;
 	default:
 		ans = 1;
@@ -313,12 +313,10 @@ enum http_method http_request_method(const http_request_t* self)
 
 //---------------------------[ http_request_url--------------------------------
 
-string_t http_request_url(const http_request_t* self)
+const char* http_request_url(const http_request_t* self)
 {
-	string_t ans = { 0, 0 };
-	if (self->url.length > 0) {
-		ans.len = self->url.length;
-		ans.s = self->sbuf.buffer + self->url.start;
-	}
+    const char* ans = 0;
+    if (self->url.length > 0)
+        ans = sbuf_get_string(&self->sbuf, self->url.start);
 	return ans;
 }

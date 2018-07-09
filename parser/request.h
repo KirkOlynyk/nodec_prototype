@@ -100,4 +100,4 @@ enum http_method http_request_method(const http_request_t* self);
 
 //---------------------------[ http_request_url ]------------------------------
 
-string_t http_request_url(const http_request_t* self);
+const char* http_request_url(const http_request_t* self);
