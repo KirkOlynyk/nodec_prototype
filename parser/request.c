@@ -322,3 +322,24 @@ string_t http_request_url(const http_request_t* self)
     }
 	return ans;
 }
+
+static string_t get_string_t(const sbuf_t* sbuf, const pascal_string_t* pstring)
+{
+    string_t ans = { sbuf_get_string(sbuf, pstring->start), pstring->length };
+    return ans;
+}
+
+static header_t get_header(const sbuf_t* sbuf, const kvp_t* kvp)
+{
+    header_t ans = { get_string_t(sbuf, &kvp->key), get_string_t(sbuf, &kvp->value) };
+    return ans;
+}
+
+void http_request_iter_headers(const http_request_t* self, void(*callback)(const header_t*, void*), void* data)
+{
+    for (size_t i = 0; i < self->kvpbuf.used; i++) {
+        const kvp_t* const kvp = self->kvpbuf.buffer + i;
+        header_t header = get_header(&self->sbuf, kvp);
+        (*callback)(&header, data);
+    }
+}

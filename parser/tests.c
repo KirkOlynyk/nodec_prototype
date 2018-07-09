@@ -86,6 +86,17 @@ void test3()
 
 //---------------------------[ test4 ]-----------------------------------------
 
+typedef struct _header_callback_data_t {
+    size_t count;
+} header_callback_data_t;
+
+static void header_callback(const header_t* header, void* data)
+{
+    header_callback_data_t* callback_data = (header_callback_data_t*)data;
+    printf("%u: { \"%s\", \"%s\" }\n", callback_data->count, header->field.s, header->value.s);
+    callback_data->count += 1;
+}
+
 void test4()
 {
 	const char* method_names[] =
@@ -103,12 +114,13 @@ void test4()
 		"Accept-Language: en-us\r\n"
 		"Accept-Encoding: gzip, deflate\r\n"
 		"User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)\r\n"
+        "accept-Language: Eastern Canadian\r\n"
 		"Content-Length: 5\r\n"
 		"\r\n"
 		"12345";
 
     const size_t len_request_string = strlen(request_string);
-    size_t start_points[] = {0, 4, 8, 24, 32, 48, 50, 60, 70, len_request_string };
+    size_t start_points[] = {0, 4, 8, 24, 32, 48, 50, 60, 65, 68, 70, len_request_string };
     assert(start_points[_countof(start_points)-2] < len_request_string);
 
 
@@ -121,7 +133,7 @@ void test4()
         }
 
 		if (http_request_headers_are_complete(req)) {
-			printf("\n");
+			printf("\n\n----------------------------------------------------------------------------------\n");
 			printf("http_major: %u\n", http_request_http_major(req));
 			printf("http_minor: %u\n", http_request_http_minor(req));
 			printf("content_length: %llu\n", http_request_content_length(req));
@@ -132,17 +144,23 @@ void test4()
 				printf("url: \"%s\"\n", url.s);
 			printf("\n");
 
-			for (size_t i = 0; i < req->kvpbuf.used; i++) {
-				const kvp_t* kvp = req->kvpbuf.buffer + i;
-				assert(kvp->key.length > 0);
-				assert(kvp->value.length > 0);
-				const char* key = req->sbuf.buffer + kvp->key.start;
-				printf("\nkey:\"%s\"\n", key);
-				const char* value = req->sbuf.buffer + kvp->value.start;
-				printf("value:\"%s\"\n", value);
-			}
-			printf("\n");
+			//for (size_t i = 0; i < req->kvpbuf.used; i++) {
+			//	const kvp_t* kvp = req->kvpbuf.buffer + i;
+			//	assert(kvp->key.length > 0);
+			//	assert(kvp->value.length > 0);
+			//	const char* key = req->sbuf.buffer + kvp->key.start;
+			//	printf("\nkey:\"%s\"\n", key);
+			//	const char* value = req->sbuf.buffer + kvp->value.start;
+			//	printf("value:\"%s\"\n", value);
+			//}
+			//printf("\n");
+            size_t count = 0;
+            http_request_iter_headers(req, header_callback, &count);
+            printf("----------------------------------------------------------------------------------\n\n");
 		}
 	}
 	http_request_free(req);
 }
+
+// void http_iter_headers(const http_request_t* self, void(*callback)(const header_t*, void*), void* data)
+

@@ -14,6 +14,15 @@ typedef struct _string_t {
 	size_t len;
 } string_t;
 
+//---------------------------[ string_t ]--------------------------------------
+//  For iterating through the headers
+//-----------------------------------------------------------------------------
+
+typedef struct _header_t {
+    string_t field;
+    string_t value;
+} header_t;
+
 //---------------------------[ http_parser_callback ]--------------------------
 // lists all possible http_parser callbacks
 //-----------------------------------------------------------------------------
@@ -50,8 +59,8 @@ typedef struct _http_request_t {
     http_parser_callback previous;
 } http_request_t;
 
-#define HTTP_REQUEST_DEFAULT_SBUF_INC 1024
-#define HTTP_REQUEST_DEFAULT_KVPBUF_INC 16
+#define HTTP_REQUEST_DEFAULT_SBUF_INC 32
+#define HTTP_REQUEST_DEFAULT_KVPBUF_INC 2
 
 //---------------------------[ http_request_alloc ]----------------------------
 // Allocates and initializes
@@ -106,3 +115,7 @@ enum http_method http_request_method(const http_request_t* self);
 //---------------------------[ http_request_url ]------------------------------
 
 string_t http_request_url(const http_request_t* self);
+
+//----------------------[ http_iter_headers ]----------------------------------
+
+void http_request_iter_headers(const http_request_t* self, void(*callback)(const header_t*, void*), void* data);
