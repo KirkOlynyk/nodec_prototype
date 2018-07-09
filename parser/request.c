@@ -313,10 +313,12 @@ enum http_method http_request_method(const http_request_t* self)
 
 //---------------------------[ http_request_url--------------------------------
 
-const char* http_request_url(const http_request_t* self)
+string_t http_request_url(const http_request_t* self)
 {
-    const char* ans = 0;
-    if (self->url.length > 0)
-        ans = sbuf_get_string(&self->sbuf, self->url.start);
+    string_t ans = { 0, 0 };
+    if (self->url.length > 0) {
+        ans.len = self->url.length;
+        ans.s = sbuf_get_string(&self->sbuf, self->url.start);
+    }
 	return ans;
 }

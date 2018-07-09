@@ -88,7 +88,7 @@ void test3()
 
 void test4()
 {
-	const char* methods[] =
+	const char* method_names[] =
 	{
 #define T(num, name, string) #string,
 		HTTP_METHOD_MAP(T)
@@ -126,10 +126,10 @@ void test4()
 			printf("http_minor: %u\n", http_request_http_minor(req));
 			printf("content_length: %llu\n", http_request_content_length(req));
 			const enum http_method method = http_request_method(req);
-			printf("method: %d (%s)\n", method, methods[method]);
-			const char* const url = http_request_url(req);
-			if (url)
-				printf("url: \"%s\"\n", url);
+			printf("method: %d (%s)\n", method, method_names[method]);
+			string_t url = http_request_url(req);
+			if (url.s != 0 && url.len > 0)
+				printf("url: \"%s\"\n", url.s);
 			printf("\n");
 
 			for (size_t i = 0; i < req->kvpbuf.used; i++) {
