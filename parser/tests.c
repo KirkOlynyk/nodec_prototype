@@ -143,16 +143,6 @@ void test4()
 				printf("url: \"%s\"\n", url.s);
 			printf("\n");
 
-			//for (size_t i = 0; i < req->kvpbuf.used; i++) {
-			//	const kvp_t* kvp = req->kvpbuf.buffer + i;
-			//	assert(kvp->key.length > 0);
-			//	assert(kvp->value.length > 0);
-			//	const char* key = req->sbuf.buffer + kvp->key.start;
-			//	printf("\nkey:\"%s\"\n", key);
-			//	const char* value = req->sbuf.buffer + kvp->value.start;
-			//	printf("value:\"%s\"\n", value);
-			//}
-			//printf("\n");
             size_t count = 0;
             http_request_iter_headers(req, header_callback, &count);
 
