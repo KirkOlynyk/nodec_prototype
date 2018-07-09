@@ -336,7 +336,7 @@ void http_request_iter_headers(
 
 //---------------------------[ filter_callback_data_t ]------------------------
 typedef struct _filter_callback_data_t {
-    bool(*filter)(const string_t*, void*);
+    bool(*filter)(const header_t*, void*);
     void* filter_data;
     void(*callback)(const header_t* header, void*);
     void* callback_data;
@@ -346,7 +346,7 @@ typedef struct _filter_callback_data_t {
 static void filter_callback(const header_t* header, void* _data)
 {
     filter_callback_data_t* data = (filter_callback_data_t*)_data;
-    if ((*data->filter)(&header->field, data->filter_data)) {
+    if ((*data->filter)(header, data->filter_data)) {
         (*data->callback)(header, data->callback);
     }
 }
@@ -354,7 +354,7 @@ static void filter_callback(const header_t* header, void* _data)
 //---------------------[ http_request_filter_headers ]-------------------------
 void http_request_filter_headers(
     const http_request_t* self,
-    bool(*filter)(const string_t*, void*),
+    bool(*filter)(const header_t*, void*),
     void* filter_data,
     void(*callback)(const header_t* header, void*), 
     void* callback_data)

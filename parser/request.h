@@ -115,11 +115,11 @@ void http_request_iter_headers(
     void* data);
 
 //---------------------[ http_request_find_headers ]---------------------------
-// Iterates through all headers whose name's match the filter function
+// Iterates through all headers matching the filter
 //-----------------------------------------------------------------------------
 void http_request_filter_headers(
     const http_request_t* self,
-    bool(*filter)(const string_t*, void*),
+    bool(*filter)(const header_t*, void*),
     void* filter_data,
     void(*callback)(const header_t* header, void*),
     void* callback_data);
