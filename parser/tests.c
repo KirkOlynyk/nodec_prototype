@@ -88,6 +88,14 @@ void test3()
 
 void test4()
 {
+	const char* methods[] =
+	{
+#define T(num, name, string) #string,
+		HTTP_METHOD_MAP(T)
+#undef T
+	};
+
+	// TBD -- break this up into chunks
 	const char* request_string =
 		"GET /docs/index.html HTTP/1.1\r\n"
 		"Host: www.nowhere123.com\r\n"
@@ -99,16 +107,13 @@ void test4()
 		"\r\n"
 		"12345";
 
-	const char* methods[] =
-	{
-#define T(num, name, string) #string,
-		HTTP_METHOD_MAP(T)
-#undef T
-	};
-
 	http_request_t* req = http_request_alloc();
 	{
+		// TBD execute all the chunks
 		http_request_execute(req, request_string, strlen(request_string));
+
+
+
 		if (http_request_headers_are_complete(req)) {
 			printf("\n");
 			printf("http_major: %u\n", http_request_http_major(req));
