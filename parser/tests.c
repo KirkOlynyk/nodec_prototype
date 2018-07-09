@@ -146,13 +146,13 @@ void test4()
             header_callback_data_t header_callback_data = { 0 };
             http_request_iter_headers(req, header_callback, &header_callback_data);
 
-            extern bool string_filter(const header_t* header, void *data);
+            extern bool header_filter(const header_t* header, void *data);
             extern void filter_headers_callback(const header_t* header, void* data);
 
             const char* const field = "accept-language";
             string_t filter_string = { field, strlen(field) };
             printf("\nFinding headers with fields matching \"accept-language\" ingnoring case ...\n\n");
-            http_request_filter_headers(req, string_filter, &filter_string, filter_headers_callback, 0);
+            http_request_filter_headers(req, header_filter, &filter_string, filter_headers_callback, 0);
             printf("\n");
             printf("----------------------------------------------------------------------------------\n\n");
         }
@@ -161,7 +161,7 @@ void test4()
 }
 
 //---------------------------[ string_filter ]---------------------------------
-bool string_filter(const header_t* header, void *data)
+bool header_filter(const header_t* header, void *data)
 {
     const string_t* field = (const string_t*)data;
     bool ans = false;
