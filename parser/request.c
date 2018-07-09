@@ -326,19 +326,31 @@ string_t http_request_url(const http_request_t* self)
 	return ans;
 }
 
+//---------------------------[ get_string_t ]----------------------------------
+
 static string_t get_string_t(const sbuf_t* sbuf, const pascal_string_t* pstring)
 {
     string_t ans = { sbuf_get_string(sbuf, pstring->start), pstring->length };
     return ans;
 }
 
+//---------------------------[ get_header ]------------------------------------
+
 static header_t get_header(const sbuf_t* sbuf, const kvp_t* kvp)
 {
-    header_t ans = { get_string_t(sbuf, &kvp->key), get_string_t(sbuf, &kvp->value) };
+    header_t ans = { 
+        get_string_t(sbuf, &kvp->key),
+        get_string_t(sbuf, &kvp->value)
+    };
     return ans;
 }
 
-void http_request_iter_headers(const http_request_t* self, void(*callback)(const header_t*, void*), void* data)
+//-------------------[ http_request_iter_headers ]-----------------------------
+
+void http_request_iter_headers(
+    const http_request_t* self,
+    void(*callback)(const header_t*, void*),
+    void* data)
 {
     for (size_t i = 0; i < self->kvpbuf.used; i++) {
         const kvp_t* const kvp = self->kvpbuf.buffer + i;
@@ -347,12 +359,16 @@ void http_request_iter_headers(const http_request_t* self, void(*callback)(const
     }
 }
 
+//---------------------------[ filter_callback_data_t ]------------------------
+
 typedef struct _filter_callback_data_t {
     bool(*filter)(const string_t*, void*);
     void* filter_data;
     void(*callback)(const header_t* header, void*);
     void* callback_data;
 } filter_callback_data_t;
+
+//---------------------------[ filter_callback ]-------------------------------
 
 static void filter_callback(const header_t* header, void* _data)
 {
@@ -362,7 +378,14 @@ static void filter_callback(const header_t* header, void* _data)
     }
 }
 
-void http_request_filter_headers(const http_request_t* self, bool(*filter)(const string_t*, void*), void* filter_data, void(*callback)(const header_t* header, void*), void* callback_data)
+//---------------------[ http_request_filter_headers ]-------------------------
+
+void http_request_filter_headers(
+    const http_request_t* self,
+    bool(*filter)(const string_t*, void*),
+    void* filter_data,
+    void(*callback)(const header_t* header, void*), 
+    void* callback_data)
 {
     filter_callback_data_t data = { filter, filter_data, callback, callback_data };
     http_request_iter_headers(self, filter_callback, &data);
