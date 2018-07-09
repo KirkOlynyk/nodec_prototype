@@ -95,17 +95,46 @@ static void header_callback(const header_t* header, void* data)
     callback_data->count += 1;
 }
 
+//---------------------------[ process_completed_request ]---------------------
+// Called by test4
+//-----------------------------------------------------------------------------
+static void process_completed_request(http_request_t* req)
+{
+    const char* method_names[] =
+    {
+#define T(num, name, string) #string,
+        HTTP_METHOD_MAP(T)
+#undef T
+    };
+
+    printf("\n\n----------------------------------------------------------------------------------\n");
+    printf("http_major: %u\n", http_request_http_major(req));
+    printf("http_minor: %u\n", http_request_http_minor(req));
+    printf("content_length: %llu\n", http_request_content_length(req));
+    const enum http_method method = http_request_method(req);
+    printf("method: %d (%s)\n", method, method_names[method]);
+    string_t url = http_request_url(req);
+    if (url.s != 0 && url.len > 0)
+        printf("url: \"%s\"\n", url.s);
+    printf("\n");
+
+    header_callback_data_t header_callback_data = { 0 };
+    http_request_iter_headers(req, header_callback, &header_callback_data);
+
+    extern bool header_filter(const header_t* header, void *data);
+    extern void filter_headers_callback(const header_t* header, void* data);
+
+    const char* const field = "accept-language";
+    string_t filter_string = { field, strlen(field) };
+    printf("\nFinding headers with fields matching \"accept-language\" ingnoring case ...\n\n");
+    http_request_filter_headers(req, header_filter, &filter_string, filter_headers_callback, 0);
+    printf("\n");
+    printf("----------------------------------------------------------------------------------\n\n");
+}
+
 //---------------------------[ test4 ]-----------------------------------------
 void test4()
 {
-	const char* method_names[] =
-	{
-#define T(num, name, string) #string,
-		HTTP_METHOD_MAP(T)
-#undef T
-	};
-
-	// TBD -- break this up into chunks
 	const char* request_string =
 		"GET /docs/index.html HTTP/1.1\r\n"
 		"Host: www.nowhere123.com\r\n"
@@ -124,39 +153,13 @@ void test4()
     assert(start_points[_countof(start_points)-2] < len_request_string);
 
 	http_request_t* req = http_request_alloc();
-	{
-        for (size_t i = 0; i < _countof(start_points) - 1; i++) {
-            size_t start = start_points[i];
-            size_t len = start_points[i + 1] - start;
-            http_request_execute(req, request_string + start, len);
-        }
-
-		if (http_request_headers_are_complete(req)) {
-			printf("\n\n----------------------------------------------------------------------------------\n");
-			printf("http_major: %u\n", http_request_http_major(req));
-			printf("http_minor: %u\n", http_request_http_minor(req));
-			printf("content_length: %llu\n", http_request_content_length(req));
-			const enum http_method method = http_request_method(req);
-			printf("method: %d (%s)\n", method, method_names[method]);
-			string_t url = http_request_url(req);
-			if (url.s != 0 && url.len > 0)
-				printf("url: \"%s\"\n", url.s);
-			printf("\n");
-
-            header_callback_data_t header_callback_data = { 0 };
-            http_request_iter_headers(req, header_callback, &header_callback_data);
-
-            extern bool header_filter(const header_t* header, void *data);
-            extern void filter_headers_callback(const header_t* header, void* data);
-
-            const char* const field = "accept-language";
-            string_t filter_string = { field, strlen(field) };
-            printf("\nFinding headers with fields matching \"accept-language\" ingnoring case ...\n\n");
-            http_request_filter_headers(req, header_filter, &filter_string, filter_headers_callback, 0);
-            printf("\n");
-            printf("----------------------------------------------------------------------------------\n\n");
-        }
-	}
+    for (size_t i = 0; i < _countof(start_points) - 1; i++) {
+        size_t start = start_points[i];
+        size_t len = start_points[i + 1] - start;
+        http_request_execute(req, request_string + start, len);
+    }
+    if (http_request_headers_are_complete(req))
+        process_completed_request(req);
 	http_request_free(req);
 }
 
