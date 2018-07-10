@@ -7,6 +7,6 @@
 int main()
 {
     test4();
-    pause("\nPress ENTER to exit ...");
+    //pause("\nPress ENTER to exit ...");
     return 0;
 }

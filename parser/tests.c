@@ -132,6 +132,7 @@ static void test_request(http_request_t* req)
         "User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)\r\n"
         "accept-Language: Eastern Canadian\r\n"
         "Content-Length: 5\r\n"
+        "accept-language: High German\r\n"
         "\r\n"
         "12345";
 
@@ -198,11 +199,13 @@ static void process_completed_request(http_request_t* req)
 }
 
 //---------------------------[ string_filter ]---------------------------------
-// used by process_completed_request
+// used by process_completed_request. This filter compares the field
+// values of the two headers. The string comparison is case independent.
+// If the field names are the same, independent of case, this returns true.
 //-----------------------------------------------------------------------------
 bool header_filter(const header_t* header, void *data)
 {
-    const string_t* field = (const string_t*)data;
+    const string_t* const field = (const string_t*)data;
     bool ans = false;
     if (header->field.len == field->len) {
         if (_strnicmp(header->field.s, field->s, field->len) == 0)
@@ -212,7 +215,8 @@ bool header_filter(const header_t* header, void *data)
 }
 
 //---------------------------[ filter_headers_callback ]-----------------------
-// used by process_completed_request
+// used by process_completed_request. Prints the contents of the header,
+// that is, it prints the field and value strings.
 //-----------------------------------------------------------------------------
 void filter_headers_callback(const header_t* header, void* data)
 {
